@@ -1,1 +1,1 @@
-In UI add your API in apiconfig.json
+In UI add your telegram bot API in apiconfig.json
