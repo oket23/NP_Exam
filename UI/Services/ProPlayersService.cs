@@ -16,9 +16,9 @@ public class ProPlayersService
         _httpClient.BaseAddress = new Uri("http://localhost:8001/");
     }
 
-    public async Task<List<ProPlayer>> GetProPlayersAsync()
+    public async Task<List<ProPlayer>> GetProPlayersAsync(int limit, int page)
     {
-        var response = await _httpClient.GetAsync("/proPlayers");
+        var response = await _httpClient.GetAsync($"/proPlayers?limit={limit}&page={page}");
         var responseContent = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)

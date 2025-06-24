@@ -1,6 +1,4 @@
-﻿using ProTeamsMicroService.Models;
-using Serilog.Core;
-using System.Collections.Specialized;
+﻿using Serilog.Core;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -42,7 +40,7 @@ public class ListenerService
             var rawQuery = httpContext.Request.Url.Query;
             var queryParams = HttpUtility.ParseQueryString(rawQuery);
 
-            int limit = int.TryParse(queryParams["limit"], out var lim) ? lim : 50;
+            int limit = int.TryParse(queryParams["limit"], out var lim) ? lim : 10;
             int page = int.TryParse(queryParams["page"], out var p) ? p : 1;
 
             _logger.Information($"Gets Endpoints: {localPath}");
@@ -54,7 +52,7 @@ public class ListenerService
         }
     }
 
-    public async Task MethodHandlerAsync(string method, string localPath, HttpListenerResponse response, HttpListenerRequest request,int limit,int page)
+    public async Task MethodHandlerAsync(string method, string localPath, HttpListenerResponse response, HttpListenerRequest request, int limit, int page)
     {
         switch (method)
         {
@@ -68,7 +66,7 @@ public class ListenerService
                 {
                     try
                     {
-                        var proTeams = await _service.GetTeamsAsync();
+                        var proTeams = await _service.GetTeamsAsync(limit, page);
 
                         if (proTeams != null)
                         {
@@ -91,7 +89,7 @@ public class ListenerService
                 {
                     try
                     {
-                        var responseTeams = await _service.GetProTeamAndFavoriteHeroAsync(limit,page);
+                        var responseTeams = await _service.GetProTeamAndFavoriteHeroAsync(limit, page);
 
                         if (responseTeams != null)
                         {

@@ -1,6 +1,5 @@
 ﻿using LoggerSevice;
 using Serilog.Core;
-using Telegram.Bot;
 using UI.Services;
 
 namespace UI;
@@ -13,10 +12,8 @@ public class Program
         var heroService = new HeroService(logger);
         var proPlayerService = new ProPlayersService(logger);
         var proTeamService = new ProTeamsService(logger);
-
-        var telegramClient = new TelegramBotClient("");
-        var bot = await telegramClient.GetMe();
-        Console.WriteLine($"Hello, World! I am user {bot.Id} and my name is {bot.FirstName}.");
+        var telegramService = new TelegramBotService(logger, proPlayerService,proTeamService,heroService);
+        telegramService.StartTelegramBot();
 
         while (true)
         {
@@ -42,6 +39,7 @@ public class Program
                     return;
             }
         }
+
     }
 
     static void ShowMainMenu()
@@ -200,7 +198,6 @@ public class Program
 
         }
     }
-
     static async Task ProPlayerMenuHandler(ProPlayersService playersService, Logger logger)
     {
         ShowProPlayersMenu();
@@ -214,7 +211,7 @@ public class Program
             case "1":
                 try
                 {
-                    var proPlayers = await playersService.GetProPlayersAsync();
+                    var proPlayers = await playersService.GetProPlayersAsync(10,2);
 
                     Console.WriteLine("\nAll pro players:");
                     foreach (var player in proPlayers)
@@ -236,7 +233,6 @@ public class Program
                 break;
         }
     }
-
     static async Task ProTeamsMenuHandler(ProTeamsService teamsService, Logger logger)
     {
         ShowProTeamsMenu();
@@ -250,7 +246,7 @@ public class Program
             case "1":
                 try
                 {
-                    var proTeams = await teamsService.GetProTeamsAsync();
+                    var proTeams = await teamsService.GetProTeamsAsync(5,1);
 
                     Console.WriteLine("\nAll teams:");
                     foreach (var teams in proTeams)
@@ -269,7 +265,7 @@ public class Program
             case "2":
                 try
                 {
-                    var proTeamsF = await teamsService.GetProTeamsAndFavoriteHeroAsync();
+                    var proTeamsF = await teamsService.GetProTeamsAndFavoriteHeroAsync(5,5);
                     Console.WriteLine("\nAll teams and favorite hero:");
                     foreach (var teams in proTeamsF)
                     {

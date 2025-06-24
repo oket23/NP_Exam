@@ -19,14 +19,14 @@ public class ProPlayersService
         _cache = new MemoryCache(new MemoryCacheOptions());
     }
 
-    public async Task<List<ProPlayer>> GetProPlayersAsync()
+    public async Task<List<ProPlayer>> GetProPlayersAsync(int limit = 10, int page = 1)
     {
-        var key = "proPlayers:all";
+        var paginationProPlayers = new List<ProPlayer>();
+        var key = $"proPlayers:all:limit={limit}:page={page}";
 
         if(!_cache.TryGetValue(key,out string json))
         {
             var response = await _client.GetAsync("proPlayers");
-
             var responseContent = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -34,10 +34,15 @@ public class ProPlayersService
                 _logger.Error("Failed to get pro players from API");
                 throw new HttpRequestException("Failed to get pro players from API");
             }
+            var allPlayers = JsonSerializer.Deserialize<List<ProPlayer>>(responseContent);
 
-            _cache.Set(key, responseContent,TimeSpan.FromMinutes(15));
+            paginationProPlayers = allPlayers.Skip((page - 1) * limit)
+                .Take(limit)
+                .ToList();
+
+            _cache.Set(key, JsonSerializer.Serialize(paginationProPlayers), TimeSpan.FromMinutes(15));
             _logger.Information("ProPlayersService gets pro players from Dota 2 API");
-            return JsonSerializer.Deserialize<List<ProPlayer>>(responseContent);
+            return paginationProPlayers;
         }
         else
         {

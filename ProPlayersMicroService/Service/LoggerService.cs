@@ -7,13 +7,13 @@ public static class LoggerService
 {
     public static Logger GetLogger()
     {
-        var logPath = "../../../../Logs/ProTeamsMircoServiceLogs.txt";
+        var logPath = "../../../../Logs/ProPlayersMircoServiceLogs.txt";
 
         var logDirectory = Path.GetDirectoryName(logPath);
         Directory.CreateDirectory(logDirectory);
 
         return new LoggerConfiguration()
-               .WriteTo.File(logPath, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [ProTeamsMircoService]: {Message:lj}{NewLine}{Exception}")
+               .WriteTo.File(logPath, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [ProPlayersService]: {Message:lj}{NewLine}{Exception}")
                .MinimumLevel.Debug()
                .CreateLogger();
     }

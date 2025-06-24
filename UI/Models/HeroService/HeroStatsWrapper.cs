@@ -16,7 +16,7 @@ public class HeroStatsWrapper
         var sb = new StringBuilder();
 
         AppendMetric(sb, "Gold Per Minute", Result.GoldPerMin);
-        AppendMetric(sb, "XP Per Minute", Result.XpPerMin);
+        AppendMetric(sb, "XP Per Minute:F3", Result.XpPerMin);
         AppendMetric(sb, "kills Per Minute", Result.KillsPerMin);
         AppendMetric(sb, "Last Hits Per Minute", Result.LastHitsPerMin);
         AppendMetric(sb, "Hero Damage Per Minute", Result.HeroDamagePerMin);
@@ -32,7 +32,7 @@ public class HeroStatsWrapper
 
         foreach (var item in values)
         {
-            sb.AppendLine($"{item.Percentile} => {item.Value}");
+            sb.AppendLine($"{item.Percentile:F2} => {item.Value:F3}");
         }
     }
 }

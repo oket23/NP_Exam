@@ -9,4 +9,5 @@ public class PercentileValue
 
     [JsonPropertyName("value")]
     public double Value { get; set; }
+     
 }

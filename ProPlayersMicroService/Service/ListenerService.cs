@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 
 namespace ProPlayersMicroService.Service;
 
@@ -36,16 +37,22 @@ public class ListenerService
             var response = httpContext.Response;
             var request = httpContext.Request;
 
+            var rawQuery = httpContext.Request.Url.Query;
+            var queryParams = HttpUtility.ParseQueryString(rawQuery);
+
+            int limit = int.TryParse(queryParams["limit"], out var lim) ? lim : 10;
+            int page = int.TryParse(queryParams["page"], out var p) ? p : 1;
+
             _logger.Information($"Gets Endpoints: {localPath}");
             Console.WriteLine($"Gets Endpoints: {localPath} on {DateTime.UtcNow}");
 
-            await MethodHandlerAsync(method, localPath, response, request);
+            await MethodHandlerAsync(method, localPath, response, request, limit, page);
 
             response.Close();
         }
     }
 
-    private async Task MethodHandlerAsync(string method, string localPath,HttpListenerResponse response, HttpListenerRequest request)
+    private async Task MethodHandlerAsync(string method, string localPath,HttpListenerResponse response, HttpListenerRequest request, int limit, int page)
     {
         switch (method)
         {
@@ -59,7 +66,7 @@ public class ListenerService
                 {
                     try
                     {
-                        var proPlayers = await _service.GetProPlayersAsync();
+                        var proPlayers = await _service.GetProPlayersAsync(limit, page);
 
                         if(proPlayers != null)
                         {

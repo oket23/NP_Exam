@@ -14,4 +14,10 @@ public class Team
     public string Name { get; set; }
     [JsonPropertyName("tag")]
     public string Tag { get; set; }
+
+    public override string ToString()
+    {
+        return $"Team id:{Id}\nTeam name: {Name}" +
+            $"\nTeam tag: {Tag}\nTeam wins: {Wins}\nTeam losses: {Losses}";
+    }
 }

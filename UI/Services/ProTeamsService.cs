@@ -16,9 +16,9 @@ public class ProTeamsService
         _httpClient.BaseAddress = new Uri("http://localhost:8002/");
     }
 
-    public async Task<List<Team>> GetProTeamsAsync()
+    public async Task<List<Team>> GetProTeamsAsync(int limit,int page)
     {
-        var response = await _httpClient.GetAsync("/pro_teams");
+        var response = await _httpClient.GetAsync($"/pro_teams?limit={limit}&page={page}");
         var responseContent = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
@@ -31,9 +31,9 @@ public class ProTeamsService
         return JsonSerializer.Deserialize<List<Team>>(responseContent);
     }
 
-    public async Task<List<ResponseTeam>> GetProTeamsAndFavoriteHeroAsync()
+    public async Task<List<ResponseTeam>> GetProTeamsAndFavoriteHeroAsync(int limit, int page)
     {
-        var response = await _httpClient.GetAsync("pro_teams/favorite");
+        var response = await _httpClient.GetAsync($"pro_teams/favorite?limit={limit}&page={page}");
         var responseContent = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)

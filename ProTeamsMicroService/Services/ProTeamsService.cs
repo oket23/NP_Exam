@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using ProTeamsMicroService.Models;
 using Serilog.Core;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace ProTeamsMicroService.Services;
@@ -19,25 +20,16 @@ public class ProTeamsService
         _cache = new MemoryCache(new MemoryCacheOptions());
     }
 
-    public async Task<List<ResponseTeam>> GetProTeamAndFavoriteHeroAsync(int limit = 50,int page = 1)
+    public async Task<List<ResponseTeam>> GetProTeamAndFavoriteHeroAsync(int limit,int page)
     {
         var key = $"proTeams:favoriteHero:limit={limit}:page={page}";
         var result = new List<ResponseTeam>();
 
         if (!_cache.TryGetValue(key, out string json))
         {
-            if (limit < 1 || limit > 50 || page < 1 || page > 20)
-            {
-                _logger.Error("Bad query params.Max limit = 50,max page = 20");
-                throw new ArgumentException("Bad query params.Max limit = 50,max page = 20");
-            }
-
-            var teams = await GetTeamsAsync();
-            var paginationTeams = teams.Skip((page - 1) * limit)
-                .Take(limit)
-                .ToList();
-
-            var tasks = paginationTeams.Select(async team => new ResponseTeam
+            var teams = await GetTeamsAsync(limit,page);
+            
+            var tasks = teams.Select(async team => new ResponseTeam
             {
                 Team = team,
                 FavoriteHero = await GetFavoriteHeroByTeamAsync(team)
@@ -84,9 +76,10 @@ public class ProTeamsService
         throw new HttpRequestException($"Heroes stats for team with id: {team.Id} not found");
     }
 
-    public async Task<List<Team>> GetTeamsAsync()
+    public async Task<List<Team>> GetTeamsAsync(int limit = 10, int page = 1)
     {
-        var key = $"proTeams:allTeams";
+        var paginationTeams = new List<Team>();
+        var key = $"proTeams:allTeams:limit={limit}:page={page}";
 
         if (!_cache.TryGetValue(key, out string json))
         {
@@ -99,9 +92,15 @@ public class ProTeamsService
                 throw new HttpRequestException("Failed to get pro teams from API");
             }
 
+            var allTeams = JsonSerializer.Deserialize<List<Team>>(responseContext);
+
+            paginationTeams = allTeams.Skip((page - 1) * limit)
+                .Take(limit)
+                .ToList();
+
             _logger.Information("ProTeamsService got pro teams from API");
-            _cache.Set(key, responseContext, TimeSpan.FromMinutes(15));
-            return JsonSerializer.Deserialize<List<Team>>(responseContext);
+            _cache.Set(key, JsonSerializer.Serialize(paginationTeams), TimeSpan.FromMinutes(15));
+            return paginationTeams;
         }
         else
         {
